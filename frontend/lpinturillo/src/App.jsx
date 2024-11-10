@@ -10,7 +10,7 @@ function App() {
   
   const [messages, setMessages] = useState([])
   const [isConnected, setIsConnected] = useState(socket.connected)
-  const {fooEvents, setFooEvents} = useState([])
+  const [userName, setUserName] = useState("new user");
 
   useEffect( () => {
     const onConnect = () => {
@@ -20,29 +20,30 @@ function App() {
     const onDisconnect = () => {
       setIsConnected(false)
     };
-    
-    const onFooEvent = (value) => {
-      setFooEvents(previous => [...previous, value])
+
+    const onMessage = (newMessage) => {
+      setMessages(previus => [...previus, {id:newMessage.user, message:newMessage.message}])
     }
     
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
-    socket.on("foo", onFooEvent);
-    
+    socket.on("chat", onMessage)
+
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
-      socket.off("foo", onFooEvent);
+      socket.off("chat", onMessage)
     }
   },
    [])
 
   const addValue = (newValue) => {
-    const newArray = messages.concat([{id:newValue, message:newValue}])
+    if(newValue === "") return
+    const newArray = messages.concat([{id:userName, message:newValue}])
     setMessages(newArray)
+    socket.timeout(5000).emit("chat", {user:userName, message: newValue}, () => { console.log("emmited");
+    });
   }
-
-  console.log(fooEvents);
   
   return (
     <>
@@ -50,7 +51,11 @@ function App() {
         <ConnectionState isConnected={isConnected}></ConnectionState>
         <Events events={[]}></Events>
         <MessagesBoard messages={messages}></MessagesBoard>
-        <MessageInput onClickHandler={(newvalue) => addValue(newvalue)}></MessageInput>
+        <MessageInput 
+          onClickHandler={(newvalue) => addValue(newvalue)}
+          userName={userName}
+          changeUserName={(newUserName) => setUserName(newUserName) }>
+        </MessageInput>
         <ConnectionManager></ConnectionManager>
       </div>
    </>

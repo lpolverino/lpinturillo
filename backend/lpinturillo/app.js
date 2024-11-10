@@ -25,6 +25,10 @@ let counter = 0
 
 io.on('connection', (socket) => {
   console.log('a user connected ' + counter++);
+  socket.on("chat", newChatMessage => {
+    socket.broadcast.emit("chat", newChatMessage)
+    console.log(newChatMessage)
+  })
 });
 
 app.use("/game", gameRouter)

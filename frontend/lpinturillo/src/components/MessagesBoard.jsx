@@ -1,14 +1,14 @@
 import PropTypes from "prop-types"
 
 const MessagesBoard = ({messages}) => {
+  
   return (
     <>
-      <div>MessagesBoard</div>
       <ul>
         {
           messages.map(element => {
             return <li key={element.id}>
-              <p>{element.message}</p>
+              <p>{element.id}:{element.message}</p>
             </li>
           })
         }
