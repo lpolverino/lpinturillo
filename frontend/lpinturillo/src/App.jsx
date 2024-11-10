@@ -2,15 +2,15 @@ import { useEffect, useState } from "react"
 import {socket} from "./socket"
 import MessageInput from "./components/MessageInput"
 import MessagesBoard from "./components/MessagesBoard"
-import ConnectionState from "./components/ConnectionState"
-import Events from "./components/Events"
 import { ConnectionManager } from "./components/ConnectionManager"
+import Canva from "./components/Canva"
 
 function App() {
   
   const [messages, setMessages] = useState([])
   const [isConnected, setIsConnected] = useState(socket.connected)
   const [userName, setUserName] = useState("new user");
+  const [usersOnline, setUsersOnline] = useState(0);
 
   useEffect( () => {
     const onConnect = () => {
@@ -19,20 +19,27 @@ function App() {
     
     const onDisconnect = () => {
       setIsConnected(false)
+      setUsersOnline(previus => previus-1)
     };
 
     const onMessage = (newMessage) => {
       setMessages(previus => [...previus, {id:newMessage.user, message:newMessage.message}])
     }
+
+    const onUsersOnline = (initualUsers) => {
+      setUsersOnline(initualUsers)
+    }
     
     socket.on("connect", onConnect);
     socket.on("disconnect", onDisconnect);
     socket.on("chat", onMessage)
+    socket.on("users-online", onUsersOnline)
 
     return () => {
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
       socket.off("chat", onMessage)
+      socket.off("users-online", onUsersOnline)
     }
   },
    [])
@@ -48,8 +55,8 @@ function App() {
   return (
     <>
       <div>
-        <ConnectionState isConnected={isConnected}></ConnectionState>
-        <Events events={[]}></Events>
+        <p>{'' + isConnected}</p>
+        <Canva></Canva>
         <MessagesBoard messages={messages}></MessagesBoard>
         <MessageInput 
           onClickHandler={(newvalue) => addValue(newvalue)}
@@ -57,6 +64,7 @@ function App() {
           changeUserName={(newUserName) => setUserName(newUserName) }>
         </MessageInput>
         <ConnectionManager></ConnectionManager>
+        <p>Users Online: {usersOnline}</p>
       </div>
    </>
   )

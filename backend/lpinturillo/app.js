@@ -24,10 +24,15 @@ app.use((req, res, next)=>  {
 let counter = 0
 
 io.on('connection', (socket) => {
-  console.log('a user connected ' + counter++);
+  console.log('a user connected ' + ++counter);
+  io.emit("users-online", counter)
   socket.on("chat", newChatMessage => {
     socket.broadcast.emit("chat", newChatMessage)
     console.log(newChatMessage)
+  })
+  socket.on("disconnect", ()=> {
+    console.log('a user disconnected ' + --counter);
+    io.emit("users-online", counter)
   })
 });
 
