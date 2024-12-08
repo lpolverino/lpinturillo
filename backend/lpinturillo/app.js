@@ -28,7 +28,12 @@ io.on('connection', (socket) => {
   io.emit("users-online", counter)
   socket.on("chat", newChatMessage => {
     socket.broadcast.emit("chat", newChatMessage)
-    console.log(newChatMessage)
+  })
+  socket.on("mouse-drag",(position)=>{
+    socket.broadcast.emit("mouse-drag", position)
+  })
+  socket.on("mouse-down", (position) => {
+    socket.broadcast.emit("mouse-down", position)
   })
   socket.on("disconnect", ()=> {
     console.log('a user disconnected ' + --counter);
