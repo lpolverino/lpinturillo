@@ -89,19 +89,19 @@ const Canva = () => {
 
     const handleMouseDrag = (position) => {
       const currentCanvas = canvasRef.current;
+      draw(position, currentCanvas, ctx);
       canvasRef.current.lastPressedPosition = {
         x: position.x - currentCanvas.x,
         y:position.y - currentCanvas.y
       }
-      draw(position,currentCanvas,ctx);
     }
 
     const handleMouseDown = (position) => {
       console.log(position);
-      const currentCanvas = canvasRef.current;
+      
       canvasRef.current.lastPressedPosition = {
-        x: position.x - currentCanvas.x,
-        y:position.y - currentCanvas.y
+        x:position.x,
+        y:position.y
       }
       ctx.fillRect(position.x, position.y, 10 , 10)
     }
@@ -187,12 +187,12 @@ const Canva = () => {
               }
             })
             if(mouse.pressed){
+              draw({x:e.pageX, y:e.pageY}, canvasRef.current, ctx)
               canvasRef.current.lastPressedPosition = {
                 x:e.pageX - canvasRef.current.x,
                 y:e.pageY - canvasRef.current.y
               }
               socket.emit("mouse-drag",{x: e.pageX , y:e.pageY} )
-              draw({x:e.pageX, y:e.pageY}, canvasRef.current, ctx)
             }
           }
         }

@@ -1,73 +1,22 @@
-import { useEffect, useState } from "react"
-import {socket} from "./socket"
-import MessageInput from "./components/MessageInput"
-import MessagesBoard from "./components/MessagesBoard"
-import { ConnectionManager } from "./components/ConnectionManager"
-import Canva from "./components/Canva"
+import { useState } from "react"
+import Game from "./components/Game"
+import Lobby from "./components/Lobby";
 
-function App() {
-  
-  const [messages, setMessages] = useState([])
-  const [isConnected, setIsConnected] = useState(socket.connected)
-  const [userName, setUserName] = useState("new user");
-  const [usersOnline, setUsersOnline] = useState(0);
+const App = () => {
+  const [inGame, setInGame] = useState(false);
+  const [userState, setUserState] = useState({
+    name:undefined,
+    gameID:undefined
+  })
 
-  useEffect( () => {
-    const onConnect = () => {
-      setIsConnected(true)
-    };
-    
-    const onDisconnect = () => {
-      setIsConnected(false)
-      setUsersOnline(previus => previus-1)
-    };
-
-    const onMessage = (newMessage) => {
-      setMessages(previus => [...previus, {id:newMessage.user, message:newMessage.message}])
-    }
-
-    const onUsersOnline = (initualUsers) => {
-      setUsersOnline(initualUsers)
-    }
-    
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-    socket.on("chat", onMessage)
-    socket.on("users-online", onUsersOnline)
-
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-      socket.off("chat", onMessage)
-      socket.off("users-online", onUsersOnline)
-    }
-  },
-   [])
-
-  const addValue = (newValue) => {
-    if(newValue === "") return
-    const newArray = messages.concat([{id:userName, message:newValue}])
-    setMessages(newArray)
-    socket.timeout(5000).emit("chat", {user:userName, message: newValue}, () => { console.log("emmited");
-    });
+  const handleEnterLobby = (name, lobby) => {
+    setInGame(true);
+    setUserState({ name, lobby })
   }
-  
-  return (
-    <>
-      <div>
-        <p>{'' + isConnected}</p>
-        <Canva></Canva>
-        <MessagesBoard messages={messages}></MessagesBoard>
-        <MessageInput 
-          onClickHandler={(newvalue) => addValue(newvalue)}
-          userName={userName}
-          changeUserName={(newUserName) => setUserName(newUserName) }>
-        </MessageInput>
-        <ConnectionManager></ConnectionManager>
-        <p>Users Online: {usersOnline}</p>
-      </div>
-   </>
-  )
+
+  return inGame
+    ?<Game userState={userState}></Game>
+    :<Lobby enterLobby={handleEnterLobby}></Lobby>
 }
 
 export default App
