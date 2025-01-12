@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { socket } from "../socket";
+import PropTypes from "prop-types"
 
 function draw(position, canvas ,ctx){
   
@@ -50,7 +51,7 @@ function bresenhamsLineAlgorith(ctx, start, finish) {
   }
 }
 
-const Canva = () => {
+const Canva = ({lobby, gameState}) => {
 
   const [mouse, setMouse] = useState({
     x:undefined,
@@ -154,10 +155,12 @@ const Canva = () => {
               }
           })
           
-          
+          if(!gameState) return
+
           socket.emit("mouse-down", {
             x: e.pageX - canvasRef.current.x ,
-            y: e.pageY - canvasRef.current.y
+            y: e.pageY - canvasRef.current.y,
+            lobby
           })
 
           canvasRef.current.lastPressedPosition = {
@@ -175,7 +178,6 @@ const Canva = () => {
                 pressed: false,
               }
           })
-          console.log(ctx);
 
         }}
         onMouseMove={ (e) => {
@@ -186,13 +188,13 @@ const Canva = () => {
                 y:e.pageY,
               }
             })
-            if(mouse.pressed){
+            if(mouse.pressed && gameState){
               draw({x:e.pageX, y:e.pageY}, canvasRef.current, ctx)
               canvasRef.current.lastPressedPosition = {
                 x:e.pageX - canvasRef.current.x,
                 y:e.pageY - canvasRef.current.y
               }
-              socket.emit("mouse-drag",{x: e.pageX , y:e.pageY} )
+              socket.emit("mouse-drag",{x: e.pageX , y:e.pageY, lobby} )
             }
           }
         }
@@ -200,6 +202,11 @@ const Canva = () => {
       </canvas>
     </div>
   )
+}
+
+Canva.propTypes = {
+  gameState: PropTypes.bool.isRequired,
+  lobby: PropTypes.string.isRequired
 }
 
 export default Canva
